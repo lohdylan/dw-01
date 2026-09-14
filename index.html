@@ -220,6 +220,10 @@ body {
 /* ---- terminal inside a window -------------------------------------------- */
 
 #screen {
+  /* The scrollback must not hand its scroll to the desk when it reaches
+   * an end. On a phone that chaining is what made the page and the shell
+   * scroll as one confusing thing. */
+  overscroll-behavior: contain;
   position: absolute; inset: 0;
   overflow-y: auto; overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -6096,9 +6100,11 @@ const Main = (() => {
   function openWindows() {
     const L = layout();
 
-    /* On a phone the sphere goes first: it is the thing worth seeing before
-     * anything is read. On a desktop they sit side by side. */
-    const order = WM.isTouch ? ['cortex', 'term'] : ['term', 'cortex'];
+    /* On a phone the shell goes first so the prompt is on screen without
+     * scrolling, with the ball fully visible under it. Ball-first looked
+     * better and made typing a two-scroll job, which Dylan called out. On
+     * a desktop they sit side by side. */
+    const order = ['term', 'cortex'];
 
     /* The sphere mounts into this wrap, not into win.body. The wrap is
      * position:absolute with a black background, and WM.create puts it
