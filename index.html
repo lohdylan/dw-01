@@ -3525,9 +3525,13 @@ void main() {
 
   /* ---- instance -------------------------------------------------------------- */
 
+  /* Fewer cells on a phone, for the battery. One source for the number so
+   * the boot readout and the banner can never disagree with the ball. */
+  const cellCount = () => (WM.isTouch ? 420 : 1000);
+
   function mount(container, opts) {
     const o = Object.assign({
-      n: WM.isTouch ? 420 : 1000,
+      n: cellCount(),
       seed: 42,
       msPerFrame: 7,
       spin: 0.055,
@@ -3962,7 +3966,7 @@ void main() {
     };
   }
 
-  return { mount };
+  return { mount, cellCount };
 })();
 
 
@@ -6246,7 +6250,7 @@ const Main = (() => {
                     : narrow ? ', linked' : ', no dangling references'));
     if (pause) await Term.sleep(pause);
 
-    ok('cortex', (WM.isTouch ? 420 : 1000) + ' cells, running');
+    ok('cortex', Cortex.cellCount() + ' cells, running');
     if (pause) await Term.sleep(pause);
 
     ok('ready', bootMs.toFixed(1) + ' ms');
@@ -6258,8 +6262,11 @@ const Main = (() => {
     Term.line({ html: '<div class="display-sub">Dylan built you a computer. '
       + 'Everything in it runs.</div>' });
     Term.line('');
-    Term.line({ html: '<span class="dim">The ball is a thousand Izhikevich neurons, live. '
-      + 'The shell reads them. Somewhere in here are four locks.</span>' });
+    /* The count has to be the real one: a phone runs 420, and the readout
+     * two lines up already says so. */
+    const cells = Cortex.cellCount();
+    Term.line({ html: '<span class="dim">The ball is ' + (cells === 1000 ? 'a thousand' : cells)
+      + ' Izhikevich neurons, live. The shell reads them. Somewhere in here are four locks.</span>' });
     Term.line('');
 
     if (state.visits > 1 && prev) {
